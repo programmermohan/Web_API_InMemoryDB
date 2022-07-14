@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "AxqLHDNmnWwrGks+rfq/l5PubzXM18GfOJwGl+/0eXMoolkHHpDQOys5NyHY39Gh91+c0JkDRKkTXsXZHN9wmA==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\AH34769\\OneDrive - Anthem\\Desktop\\Documentation\\FICR\\Knowledge Sharing to Team\\Web API\\Winform_API_Test\\Winform_API_Test.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\AH34769\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}
