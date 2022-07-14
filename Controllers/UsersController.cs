@@ -1,4 +1,5 @@
 ﻿using BusinessLayer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -13,6 +14,7 @@ namespace Web_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly DatabaseContext _databaseContext;
@@ -33,6 +35,7 @@ namespace Web_API.Controllers
 
         [HttpPost]
         [Route("Login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] User UserModel)
         {
             List<User> Users = _databaseContext.GetUsers();
@@ -47,15 +50,64 @@ namespace Web_API.Controllers
                 var accessToken = _tokenService.GenerateAccessToken(claims);
                 return Ok(new
                 {
-                   token = new JwtSecurityTokenHandler().WriteToken(accessToken),
-                   expiration = accessToken.ValidTo,
-                   user = UserModel.UserName
+                    token = new JwtSecurityTokenHandler().WriteToken(accessToken),
+                    expiration = accessToken.ValidTo,
+                    user = UserModel.UserName
                 });
             }
             else
             {
                 return Unauthorized();
-            }            
+            }
+        }
+
+        [HttpPost]
+        [Route("AddUser")]
+        public async Task<IActionResult> CreateUser([FromBody] User userModel)
+        {
+            if (_databaseContext.Users.Where(a => a.UserName == userModel.UserName).FirstOrDefault() == null)
+            {
+                _databaseContext.Users.Add(userModel);
+                _databaseContext.SaveChanges();
+
+                return StatusCode(200, "Created user successfully");
+            }
+            return StatusCode(StatusCodes.Status400BadRequest, "user already exists");
+        }
+
+        [HttpPut]
+        [Route("UpdateExistingUser")]
+        public async Task<IActionResult> UpdateUser([FromBody] User userModel)
+        {
+            var user = _databaseContext.Users.Where(x => x.UserName == userModel.UserName).FirstOrDefault();
+            if (user != null)
+            {
+                user.FirstName = userModel.FirstName;
+                user.LastName = userModel.LastName;
+                user.Email = userModel.Email;
+
+                _databaseContext.SaveChanges();
+
+                return StatusCode(StatusCodes.Status200OK, "user updated successfully");
+            }
+
+            return StatusCode(StatusCodes.Status404NotFound, "user is not found to update");
+        }
+
+        [HttpDelete]
+        [Route("DeleteUser")]
+        public async Task<IActionResult>DeleteUser(int Id)
+        {
+            var user = _databaseContext.Users.Where(x => x.UserId == Id).FirstOrDefault();
+            if (user != null)
+            {
+                _databaseContext.Users.Remove(user);
+                _databaseContext.SaveChanges();
+
+                return StatusCode(StatusCodes.Status200OK, "user Deleted successfully");
+            }
+
+            return StatusCode(StatusCodes.Status404NotFound, "user is not found to delete");
         }
     }
 }
